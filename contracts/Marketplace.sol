@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.12 <0.9.0;
 
-import "Marketplace/ERC721.sol";
-import "Marketplace/ERC1155.sol";
+import "./ERC721.sol";
+import "./ERC1155.sol";
 
 contract MarketPlace {
     struct Creators {
