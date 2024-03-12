@@ -3,8 +3,9 @@ pragma solidity >=0.6.12 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-contract MyERC721 is ERC721,  ERC721URIStorage{
+contract MyERC721 is ERC165, ERC721,  ERC721URIStorage{
     constructor() ERC721("MyToken", "Token") {
         
     }
@@ -24,7 +25,7 @@ contract MyERC721 is ERC721,  ERC721URIStorage{
         _transfer(_from, _to, _tokenId);
     }
 
-    function supportsInterface(bytes4 _interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool){
+    function supportsInterface(bytes4 _interfaceId) public view override(ERC165, ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(_interfaceId);
     }
 } 

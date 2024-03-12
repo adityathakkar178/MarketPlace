@@ -3,8 +3,9 @@ pragma solidity >=0.6.12 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-contract MyERC1155 is ERC1155, ERC1155URIStorage{
+contract MyERC1155 is ERC165, ERC1155, ERC1155URIStorage{
     constructor() ERC1155("") {
         
     }
@@ -23,5 +24,9 @@ contract MyERC1155 is ERC1155, ERC1155URIStorage{
 
     function trasnferFrom(address _from, address _to, address _owner, uint256 _tokenId) public {
         _safeTransferFrom(_from, _to, _tokenId, balanceOf(_owner, _tokenId), "");
+    }
+
+    function supportsInterface(bytes4 _interfaceId) public view override(ERC165, ERC1155) returns (bool) {
+        return super.supportsInterface(_interfaceId);
     }
 }
