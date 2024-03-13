@@ -74,7 +74,7 @@ describe('Mix Marketplace', function () {
         expect(sales.tokenId).to.equal(1);
         expect(sales.price).to.equal(100);
         expect(sales.onSale).to.be.true;
-        // Buy ERC1155 tokens with value
+        // Buy ERC1155 tokens
         await marketplace
             .connect(tokenBuyer)
             .buy(1, tokenSeller.address, { value: 100 });
