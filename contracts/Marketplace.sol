@@ -37,7 +37,6 @@ contract MarketPlace is ERC165 {
 
     MyERC721 private _erc721Contract;
     MyERC1155 private _erc1155Contract;
-    address private _admin;
     uint256 private _tokenIdCounter;
     mapping (string => bool) private _tokenURIs;
     mapping (uint256 => mapping (address => SaleAccount)) public saleToken;
@@ -47,7 +46,6 @@ contract MarketPlace is ERC165 {
     mapping (uint256 => mapping (address => mapping (address => bool))) public hasPlacedBid;
 
     constructor(address _erc721Address, address _erc1155Address) {
-        _admin = msg.sender;
         _erc721Contract = MyERC721(_erc721Address);
         _erc1155Contract = MyERC1155(_erc1155Address);
     }
