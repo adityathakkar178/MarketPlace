@@ -86,4 +86,17 @@ describe('Mix Marketplace', function () {
         const updateSale = await marketplace.saleToken(1, tokenSeller.address);
         expect(updateSale.onSale).to.be.false;
     });
+
+    it('Should start unlimited auction for ERC721 tokens', async function () {
+        await marketplace.mintERC721("Token Name", "Token URI");
+        // Start unlimited auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(1, tokenSeller.address);
+        console.log(auction);
+        expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        expect(auction.auctionStartTime).to.equal();
+    });
 });
