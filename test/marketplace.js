@@ -118,6 +118,15 @@ describe('Mix Marketplace', function () {
         const balanceOfBidder = await erc721Contract.balanceOf(bidder.address);
         expect(balanceOfSeller).to.equal(0);
         expect(balanceOfBidder).to.equal(1);
+        const endAuction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller
+        );
+        expect(endAuction.seller).to.equal(
+            '0x0000000000000000000000000000000000000000'
+        );
+        expect(endAuction.tokenId).to.equal(0);
+        expect(endAuction.startingPrice).to.equal(0);
     });
 
     it('Should start unlimited auction, place bid and withdraw bid for ERC721 tokens', async function () {
@@ -129,7 +138,7 @@ describe('Mix Marketplace', function () {
             1,
             tokenSeller.address
         );
-    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
         // Place a bid
@@ -161,7 +170,7 @@ describe('Mix Marketplace', function () {
             1,
             tokenSeller.address
         );
-    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
         // Place a bid
@@ -193,7 +202,7 @@ describe('Mix Marketplace', function () {
             1,
             tokenSeller.address
         );
-    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
         // Withdraw auction
@@ -218,7 +227,7 @@ describe('Mix Marketplace', function () {
             1,
             tokenSeller.address
         );
-    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
         // Place bid
@@ -245,7 +254,7 @@ describe('Mix Marketplace', function () {
             1,
             tokenSeller.address
         );
-    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
         // Place bid
@@ -261,10 +270,23 @@ describe('Mix Marketplace', function () {
         // Accept bid
         await marketplace.acceptBid(1, bidder.address);
         const balanceOfSeller = await erc1155Contract.balanceOf(
-            tokenSeller.address, 1
+            tokenSeller.address,
+            1
         );
-        const balanceOfBidder = await erc1155Contract.balanceOf(bidder.address, 1);
+        const balanceOfBidder = await erc1155Contract.balanceOf(
+            bidder.address,
+            1
+        );
         expect(balanceOfSeller).to.equal(0);
         expect(balanceOfBidder).to.equal(100);
+        const endAuction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller
+        );
+        expect(endAuction.seller).to.equal(
+            '0x0000000000000000000000000000000000000000'
+        );
+        expect(endAuction.tokenId).to.equal(0);
+        expect(endAuction.startingPrice).to.equal(0);
     });
 });
