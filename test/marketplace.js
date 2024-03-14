@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const { ethers } = require('hardhat');
 
 describe('Mix Marketplace', function () {
     let marketplace;
@@ -87,16 +88,183 @@ describe('Mix Marketplace', function () {
         expect(updateSale.onSale).to.be.false;
     });
 
-    it('Should start unlimited auction for ERC721 tokens', async function () {
-        await marketplace.mintERC721("Token Name", "Token URI");
+    it('Should start unlimited auction, place bid and accept bid for ERC721 tokens', async function () {
+        await marketplace.mintERC721('Token Name', 'Token URI');
         // Start unlimited auction
         await marketplace.startUnlimitedAuction(1, 100);
-        const [tokenSeller] = await ethers.getSigners();
-        const auction = await marketplace.unlimitedAuction(1, tokenSeller.address);
-        console.log(auction);
+        const [tokenSeller, bidder] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
         expect(auction.seller).to.equal(tokenSeller.address);
         expect(auction.tokenId).to.equal(1);
         expect(auction.startingPrice).to.equal(100);
-        expect(auction.auctionStartTime).to.equal();
+        // Place a bid
+        await marketplace
+            .connect(bidder)
+            .placebid(1, tokenSeller.address, { value: 200 });
+        const hasPlaceBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(hasPlaceBid).to.be.true;
+        // Accept bid
+        await marketplace.acceptBid(1, bidder.address);
+        const balanceOfSeller = await erc721Contract.balanceOf(
+            tokenSeller.address
+        );
+        const balanceOfBidder = await erc721Contract.balanceOf(bidder.address);
+        expect(balanceOfSeller).to.equal(0);
+        expect(balanceOfBidder).to.equal(1);
+    });
+
+    it('Should start unlimited auction, place bid and withdraw bid for ERC721 tokens', async function () {
+        await marketplace.mintERC721('Token Name', 'Token URI');
+        // Start unlimited auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller, bidder] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
+    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        // Place a bid
+        await marketplace
+            .connect(bidder)
+            .placebid(1, tokenSeller.address, { value: 200 });
+        const hasPlaceBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(hasPlaceBid).to.be.true;
+        // Withdraw bid
+        await marketplace.connect(bidder).withdrawBid(1, tokenSeller.address);
+        const withdrawBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(withdrawBid).to.be.false;
+    });
+
+    it('Should start unlimited auction, place bid and reject bid for ERC721 tokens', async function () {
+        await marketplace.mintERC721('Token Name', 'Token URI');
+        // Start unlimited auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller, bidder] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
+    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        // Place a bid
+        await marketplace
+            .connect(bidder)
+            .placebid(1, tokenSeller.address, { value: 200 });
+        const hasPlaceBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(hasPlaceBid).to.be.true;
+        // Reject bid
+        await marketplace.rejectBid(1, bidder.address);
+        const rejectBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(rejectBid).to.be.false;
+    });
+
+    it('Should start unlimited auction and withdraw auction if bid has not placed for ERC721 tokens', async function () {
+        await marketplace.mintERC721('Token Name', 'Token URI');
+        // Start unlimited auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
+    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        // Withdraw auction
+        await marketplace.withdrawAuction(1);
+        const auctionAfterwithdraw = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller
+        );
+        expect(auctionAfterwithdraw.seller).to.equal(
+            '0x0000000000000000000000000000000000000000'
+        );
+        expect(auctionAfterwithdraw.tokenId).to.equal(0);
+        expect(auctionAfterwithdraw.startingPrice).to.equal(0);
+    });
+
+    it('Should start unlimited auction and can not withdraw auction if bid has placed', async function () {
+        await marketplace.mintERC721('Token name', 'Token URI');
+        // Start unlimited auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller, bidder] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
+    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        // Place bid
+        await marketplace
+            .connect(bidder)
+            .placebid(1, tokenSeller.address, { value: 200 });
+        const hasPlaceBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(hasPlaceBid).to.be.true;
+        expect(marketplace.withdrawAuction(1)).to.be.revertedWith(
+            'Can not withdraw auction once bid has been placed'
+        );
+    });
+
+    it('Should start unlimited auction, place bid and accept bid for ERC1155 tokens', async function () {
+        await marketplace.mintERC1155(100, 'Token URI');
+        // Start unlimite auction
+        await marketplace.startUnlimitedAuction(1, 100);
+        const [tokenSeller, bidder] = await ethers.getSigners();
+        const auction = await marketplace.unlimitedAuction(
+            1,
+            tokenSeller.address
+        );
+    expect(auction.seller).to.equal(tokenSeller.address);
+        expect(auction.tokenId).to.equal(1);
+        expect(auction.startingPrice).to.equal(100);
+        // Place bid
+        await marketplace
+            .connect(bidder)
+            .placebid(1, tokenSeller.address, { value: 200 });
+        const hasPlaceBid = await marketplace.hasPlacedBid(
+            1,
+            tokenSeller.address,
+            bidder.address
+        );
+        expect(hasPlaceBid).to.be.true;
+        // Accept bid
+        await marketplace.acceptBid(1, bidder.address);
+        const balanceOfSeller = await erc1155Contract.balanceOf(
+            tokenSeller.address, 1
+        );
+        const balanceOfBidder = await erc1155Contract.balanceOf(bidder.address, 1);
+        expect(balanceOfSeller).to.equal(0);
+        expect(balanceOfBidder).to.equal(100);
     });
 });
